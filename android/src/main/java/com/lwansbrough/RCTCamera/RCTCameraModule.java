@@ -346,6 +346,15 @@ public class RCTCameraModule extends ReactContextBaseJavaModule
     }
 
     private void record(final ReadableMap options, final Promise promise, final int deviceOrientation) {
+    
+        // Fix via: https://github.com/react-native-community/react-native-camera/issues/1306
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !options.hasKey("mute") && ContextCompat.checkSelfPermission(getCurrentActivity(), Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED){
+
+          getCurrentActivity().requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO}, 123);
+          promise.reject("E_CAMERA_RECORD_AUDIO_NOT_GRANTED", "Record audio permission has been asked but not granted yet");
+          return;
+      }
+    
         if (mRecordingPromise != null) {
             return;
         }
