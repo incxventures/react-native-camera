@@ -19,6 +19,7 @@
 @property(nonatomic, strong) AVCaptureStillImageOutput *stillImageOutput;
 @property(nonatomic, strong) AVCaptureMovieFileOutput *movieFileOutput;
 @property(nonatomic, strong) AVCaptureMetadataOutput *metadataOutput;
+@property(nonatomic, strong) AVCaptureConnection * captureConnection;
 @property(nonatomic, strong) id runtimeErrorHandlingObserver;
 @property(nonatomic, strong) AVCaptureVideoPreviewLayer *previewLayer;
 @property(nonatomic, strong) NSArray *barCodeTypes;
