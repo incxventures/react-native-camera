@@ -864,9 +864,9 @@ static NSDictionary *defaultFaceDetectorOptions = nil;
     [_faceDetectorManager maybeStartFaceDetectionOnSession:_session withPreviewLayer:_previewLayer];
 #endif
 
-    if (self.session.sessionPreset != AVCaptureSessionPresetPhoto) {
-        [self updateSessionPreset:AVCaptureSessionPresetPhoto];
-    }
+    //if (self.session.sessionPreset != AVCaptureSessionPresetPhoto) {
+    //    [self updateSessionPreset:AVCaptureSessionPresetPhoto];
+    //}
 }
 
 - (void)mirrorVideo:(NSURL *)inputURL completion:(void (^)(NSURL* outputUR))completion {
