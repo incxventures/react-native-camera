@@ -45,6 +45,7 @@ static NSDictionary *defaultFaceDetectorOptions = nil;
         self.paused = NO;
         [self changePreviewOrientation:[UIApplication sharedApplication].statusBarOrientation];
         [self initializeCaptureSessionInput];
+        [self setupMovieFileCapture];
         [self startSession];
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(orientationChanged:)
@@ -424,7 +425,7 @@ static NSDictionary *defaultFaceDetectorOptions = nil;
 #if __has_include(<GoogleMobileVision/GoogleMobileVision.h>)
         [_faceDetectorManager stopFaceDetection];
 #endif
-        [self setupMovieFileCapture];
+        //[self setupMovieFileCapture];
     }
 
     if (self.movieFileOutput == nil || self.movieFileOutput.isRecording || _videoRecordedResolve != nil || _videoRecordedReject != nil) {
@@ -441,27 +442,31 @@ static NSDictionary *defaultFaceDetectorOptions = nil;
     }
 
     if (options[@"quality"]) {
-        [self updateSessionPreset:[RNCameraUtils captureSessionPresetForVideoResolution:(RNCameraVideoResolution)[options[@"quality"] integerValue]]];
+        //[self updateSessionPreset:[RNCameraUtils captureSessionPresetForVideoResolution:(RNCameraVideoResolution)[options[@"quality"] integerValue]]];
     }
 
-    [self updateSessionAudioIsMuted:!!options[@"mute"]];
+    //[self updateSessionAudioIsMuted:!!options[@"mute"]];
 
-    AVCaptureConnection *connection = [self.movieFileOutput connectionWithMediaType:AVMediaTypeVideo];
-    if (self.videoStabilizationMode != 0) {
-        if (connection.isVideoStabilizationSupported == NO) {
-            RCTLogWarn(@"%s: Video Stabilization is not supported on this device.", __func__);
-        } else {
-            [connection setPreferredVideoStabilizationMode:self.videoStabilizationMode];
-        }
-    }
+    AVCaptureConnection *connection = self.captureConnection;
+    //AVCaptureConnection *connection = [self.movieFileOutput connectionWithMediaType:AVMediaTypeVideo];
+    //if (self.videoStabilizationMode != 0) {
+    //    if (connection.isVideoStabilizationSupported == NO) {
+    //        RCTLogWarn(@"%s: Video Stabilization is not supported on this device.", __func__);
+    //    } else {
+    //        [connection setPreferredVideoStabilizationMode:self.videoStabilizationMode];
+    //    }
+    //}
     [connection setVideoOrientation:[RNCameraUtils videoOrientationForDeviceOrientation:[[UIDevice currentDevice] orientation]]];
 
     if (options[@"codec"]) {
       if (@available(iOS 10, *)) {
-        AVVideoCodecType videoCodecType = options[@"codec"];
-        if ([self.movieFileOutput.availableVideoCodecTypes containsObject:videoCodecType]) {
-          [self.movieFileOutput setOutputSettings:@{AVVideoCodecKey:videoCodecType} forConnection:connection];
-          self.videoCodecType = videoCodecType;
+            AVVideoCodecType videoCodecType = options[@"codec"];
+            if ([self.movieFileOutput.availableVideoCodecTypes containsObject:videoCodecType]) {
+                [self.movieFileOutput setOutputSettings:@{AVVideoCodecKey:videoCodecType} forConnection:connection];
+                self.videoCodecType = videoCodecType;
+            } else {
+                RCTLogWarn(@"%s: Video Codec '%@' is not supported on this device.", __func__, videoCodecType);
+            }
         } else {
             RCTLogWarn(@"%s: Setting videoCodec is only supported above iOS version 10.", __func__);
         }
@@ -810,6 +815,11 @@ static NSDictionary *defaultFaceDetectorOptions = nil;
         [self.session addOutput:movieFileOutput];
         self.movieFileOutput = movieFileOutput;
     }
+    [self updateSessionPreset:[RNCameraUtils captureSessionPresetForVideoResolution:(RNCameraVideoResolution)RNCameraVideo720p]];
+    AVCaptureConnection *connection = [self.movieFileOutput connectionWithMediaType:AVMediaTypeVideo];
+    self.captureConnection = connection;
+    [self.captureConnection setPreferredVideoStabilizationMode:AVCaptureVideoStabilizationModeStandard];
+ 
 }
 
 - (void)cleanupMovieFileCapture
